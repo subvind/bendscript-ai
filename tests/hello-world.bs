@@ -1,0 +1,5 @@
+(function () {
+  /*intrabend test(return hello world)[*/
+   // todo
+  /*[*/
+})()

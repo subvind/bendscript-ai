@@ -1,0 +1,27 @@
+{
+  "name": "intrabend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "cli.js",
+  "type": "module",
+  "bin": {
+    "intrabend": "./cli.js"
+  },
+  "directories": {
+    "example": "examples",
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "node cli.js",
+    "prompt": "node prompt.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "minimist": "^1.2.8",
+    "openai": "^4.47.3",
+    "yargs": "^17.7.2"
+  }
+}
