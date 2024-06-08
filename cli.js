@@ -79,7 +79,7 @@ async function runAI(prompt) {
 }
 
 function extractCodeFromMarkdown(markdown) {
-  const match = markdown.match(/```javascript|```js[\s\S]*?```/);
+  const match = markdown.match(/```javascript|```js|```[\s\S]*?```/);
   if (match) {
     return match[0].replace(/```javascript|```js|```/g, '').trim();
   }
