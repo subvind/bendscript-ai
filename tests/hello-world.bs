@@ -1,6 +1,15 @@
 (function () {
   /*test: say hello world*/
-    console.log("Hello World 😊😊😊");
-
+    console.log("Hello, world!");
   /*test*/
+
+  /*example: a function that calculates fibonacci*/
+    function fibonacci(n) {
+        if (n <= 1) {
+            return n;
+        } else {
+            return fibonacci(n - 1) + fibonacci(n - 2);
+        }
+    }
+  /*example*/
 })()
