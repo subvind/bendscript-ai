@@ -19,78 +19,123 @@ be sure to use AI_CALL.md for demo ai call
 be sure to use yargs instead of minimist
 be sure to use fs.readFile() when getting input
 
-when using acon walk,
+when walking the file,
 - look for 2 block comments; an opening and closing
 - the 2 block comments should match based on methodName
 - the text to replace should be everything between both block comments
 
 Don't forget to account for the fact that there many be many block
 comments in the file with many different method names.
+
+When writing to the file don't forget to preserve spacing such that,
+- if the first comment block has 2 spaces infront of it then indent the prompt output by 4 spaces total
+- if it first comment block has no spaces then indent the prompt output by 2 spaces total
+
+Leave comment blocks untouched when changing file.
+
+Durring prompt completion be sure to ask for only javascript like syntax output.
+After prompt completion be sure to extract the raw code out from the markdown.
 */
 
 import fs from 'fs';
+import path from 'path';
 import yargs from 'yargs';
-import dotenv from 'dotenv';
 import { hideBin } from 'yargs/helpers';
-import OpenAI from 'openai';
+import dotenv from 'dotenv';
+import OpenAI from "openai";
 
 dotenv.config();
 
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+if (!OPENAI_API_KEY) {
+  console.error('Error: OPENAI_API_KEY is not set in the environment variables.');
+  process.exit(1);
+}
+
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: OPENAI_API_KEY
 });
 
-async function callAI(prompt) {
-  const completion = await openai.chat.completions.create({
-    messages: [{ role: 'system', content: 'You are a helpful assistant.' }, { role: 'user', content: prompt }],
-    model: 'gpt-3.5-turbo',
-  });
+async function runAI(prompt) {
+  console.log('Running AI with prompt:', prompt);
 
-  return completion.choices[0].message.content;
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'system', content: 'You are a helpful assistant.' }, { role: 'user', content: prompt }],
+    });
+
+    const rawOutput = completion.choices[0].message.content;
+    console.log('AI raw output:', rawOutput);
+    return extractCodeFromMarkdown(rawOutput);
+  } catch (error) {
+    console.error('Error calling OpenAI API:', error);
+    return null;
+  }
+}
+
+function extractCodeFromMarkdown(markdown) {
+  const match = markdown.match(/```[\s\S]*?```/);
+  if (match) {
+    return match[0].replace(/```/g, '').trim();
+  }
+  return markdown.trim();
+}
+
+function processFile(fileName, methodName) {
+  fs.readFile(fileName, 'utf8', async (err, data) => {
+    if (err) {
+      console.error('Error reading file:', err);
+      return;
+    }
+
+    const regex = new RegExp(`(\\s*)\\/\\*${methodName}: (.*?)\\*\\/([\\s\\S]*?)\\/\\*${methodName}\\*\\/`, 'g');
+    const matches = [...data.matchAll(regex)];
+    
+    if (matches.length === 0) {
+      console.error('No matching blocks found for methodName:', methodName);
+      return;
+    }
+
+    for (const match of matches) {
+      const [fullMatch, indent, prompt, originalCode] = match;
+      console.log('Found match:', fullMatch);
+      console.log('Prompt:', prompt);
+      console.log('Original code:', originalCode);
+
+      const aiResponse = await runAI(prompt);
+      if (aiResponse) {
+        const newIndent = ' '.repeat(indent.length + 2);
+        const newCode = aiResponse.split('\n').map(line => newIndent + line).join('\n');
+        const newContent = `${indent}/*${methodName}: ${prompt}*/\n${newCode}\n${indent}/*${methodName}*/`;
+        data = data.replace(fullMatch, newContent);
+      }
+    }
+
+    fs.writeFile(fileName, data, 'utf8', (err) => {
+      if (err) {
+        console.error('Error writing file:', err);
+      } else {
+        console.log('File updated successfully.');
+      }
+    });
+  });
 }
 
 const argv = yargs(hideBin(process.argv))
-  .option('input', {
-    alias: 'i',
-    description: 'Input file name',
+  .option('i', {
+    alias: 'input',
+    describe: 'Input file name',
     type: 'string',
-    demandOption: true,
+    demandOption: true
   })
-  .option('block', {
-    alias: 'b',
-    description: 'Block method name',
+  .option('b', {
+    alias: 'block',
+    describe: 'Method name to look for in the file',
     type: 'string',
-    demandOption: true,
+    demandOption: true
   })
-  .help()
-  .alias('help', 'h')
   .argv;
 
-fs.readFile(argv.input, 'utf8', async (err, data) => {
-  if (err) {
-    console.error(`Error reading file: ${err}`);
-    return;
-  }
-
-  const methodName = argv.block;
-  const regex = new RegExp(`\\/\\*${methodName}: (.*?)\\*\\/([\\s\\S]*?)\\/\\*${methodName}\\*\\/`, 'g');
-  let match;
-  let updatedData = data;
-
-  while ((match = regex.exec(data)) !== null) {
-    const prompt = match[1].trim();
-    console.log(`Found block with prompt: "${prompt}"`);
-    const aiResponse = await callAI(prompt);
-    console.log(`AI response: "${aiResponse}"`);
-    const newBlock = `/*${methodName}: ${prompt}*/\n${aiResponse}\n/*${methodName}*/`;
-    updatedData = updatedData.replace(match[0], newBlock);
-  }
-
-  fs.writeFile(argv.input, updatedData, 'utf8', (err) => {
-    if (err) {
-      console.error(`Error writing file: ${err}`);
-    } else {
-      console.log(`File successfully updated: ${argv.input}`);
-    }
-  });
-});
+processFile(argv.input, argv.block);

@@ -23,13 +23,22 @@ be sure to use AI_CALL.md for demo ai call
 be sure to use yargs instead of minimist
 be sure to use fs.readFile() when getting input
 
-when using acon walk,
+when walking the file,
 - look for 2 block comments; an opening and closing
 - the 2 block comments should match based on methodName
 - the text to replace should be everything between both block comments
 
 Don't forget to account for the fact that there many be many block
 comments in the file with many different method names.
+
+When writing to the file don't forget to preserve spacing such that,
+- if the first comment block has 2 spaces infront of it then indent the prompt output by 4 spaces total
+- if it first comment block has no spaces then indent the prompt output by 2 spaces total
+
+Leave comment blocks untouched when changing file.
+
+Durring prompt completion be sure to ask for only javascript like syntax output.
+After prompt completion be sure to extract the raw code out from the markdown.
 */
 
 ```
