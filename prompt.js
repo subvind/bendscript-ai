@@ -7,6 +7,7 @@ will understand with file names, types, and content.
 such as:
 - ./cli.js
 - ./tests/hello-world.bs
+- ./RULES.md
 - ./RUN_TESTS.md
 - ./EXAMPLE_SYNTAX.md
 - ./AI_CALL.md
@@ -29,6 +30,7 @@ import path from 'path';
 const filesToMerge = [
   './cli.js',
   './tests/hello-world.bs',
+  './RULES.md',
   './RUN_TESTS.md',
   './EXAMPLE_SYNTAX.md',
   './AI_CALL.md',

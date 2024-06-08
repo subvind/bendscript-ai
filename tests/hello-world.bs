@@ -1,6 +1,6 @@
 (function () {
   /*test: say hello world*/
-     Hello, world! How may I assist you today?
+    console.log("Hello World 😊😊😊");
 
   /*test*/
 })()
