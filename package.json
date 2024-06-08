@@ -19,9 +19,13 @@
   "keywords": [],
   "author": "",
   "dependencies": {
+    "acorn": "^8.11.3",
+    "acorn-walk": "^8.3.2",
     "dotenv": "^16.4.5",
+    "fs": "^0.0.1-security",
     "minimist": "^1.2.8",
-    "openai": "^4.47.3",
+    "openai": "^4.49.1",
+    "util": "^0.12.5",
     "yargs": "^17.7.2"
   }
 }

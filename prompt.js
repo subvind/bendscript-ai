@@ -6,7 +6,6 @@ will understand with file names, types, and content.
 
 such as:
 - ./cli.js
-- ./openai.js
 - ./tests/hello-world.bs
 - ./RUN_TESTS.md
 - ./EXAMPLE_SYNTAX.md
@@ -29,7 +28,6 @@ import path from 'path';
 // List of files to be merged into PROMPT.md
 const filesToMerge = [
   './cli.js',
-  './openai.js',
   './tests/hello-world.bs',
   './RUN_TESTS.md',
   './EXAMPLE_SYNTAX.md',

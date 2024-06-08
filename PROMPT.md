@@ -12,12 +12,9 @@ which would look in the file for syntax like that
 found in EXAMPLE_SYNTAX.md
 
 for this hello world example:
-- such that the name after intrabend is the methodName 
-that means "test"
-- such that everything between the () is to be prompted to ai
-that means "return hello world"
-- such that everything between the [] is to be replaced by output from ai
-that means "// todo" would be replaced
+- such that the name at the beginning is the methodName; which would be "welcome"...
+- such that everything after the methodName and colon is the prompt; which would be "say hello world"...
+- such that everything between the 2 comment blocks is the prompt output; which would be "  console.log("");"...
 
 be sure to use module syntax
 be sure to use chatgpt when calling the ai
@@ -25,102 +22,15 @@ be sure to use dotenv for OPENAI_API_KEY
 be sure to use AI_CALL.md for demo ai call
 be sure to use yargs instead of minimist
 be sure to use fs.readFile() when getting input
+
+when using acon walk,
+- look for 2 block comments; an opening and closing
+- the 2 block comments should match based on methodName
+- the text to replace should be everything between both block comments
+
+Don't forget to account for the fact that there many be many block
+comments in the file with many different method names.
 */
-
-// Import necessary modules
-import fs from 'fs';
-import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
-import { createChatCompletion } from './openai.js';
-
-// Define the command-line options using yargs
-const argv = yargs(hideBin(process.argv))
-  .usage('Usage: $0 -i [input file] -b [method name]')
-  .option('i', {
-    alias: 'input',
-    describe: 'Input file path',
-    demandOption: true,
-    type: 'string'
-  })
-  .option('b', {
-    alias: 'method',
-    describe: 'Method name',
-    demandOption: true,
-    type: 'string'
-  })
-  .argv;
-
-// Read input file
-fs.readFile(argv.input, 'utf8', async (err, data) => {
-  if (err) {
-    console.error('Error reading input file:', err);
-    return;
-  }
-
-  // Parse input file to extract content to be prompted to AI
-  const regex = new RegExp(`\\/\\*intrabend ${argv.method}\\(([^\\]]+)\\)\\[\\*\\/(.+)\\]\\[`, 's');
-  const match = data.match(regex);
-
-  if (!match) {
-    console.error(`Method ${argv.method} not found in the input file.`);
-    return;
-  }
-
-  const contentToPrompt = match[1].trim();
-
-  // Call OpenAI's GPT-3 model
-  try {
-    const completion = await createChatCompletion(contentToPrompt);
-
-    if (!completion || !completion.choices || completion.choices.length === 0) {
-      console.error('Error completing prompt with OpenAI.');
-      return;
-    }
-
-    const aiOutput = completion.choices[0].text.trim();
-
-    // Replace placeholder in the input file with AI output
-    const updatedData = data.replace(`// todo`, aiOutput);
-
-    console.log(updatedData);
-  } catch (error) {
-    console.error('Error calling OpenAI:', error);
-  }
-});
-
-```
-
-### ./openai.js
-
-```js
-
-// Load environment variables
-import { config } from 'dotenv';
-config();
-
-// Import necessary modules
-import OpenAI from 'openai';
-
-// Initialize OpenAI instance with API key
-console.log('process.env.OPENAI_API_KEY',process.env.OPENAI_API_KEY)
-const openai = new OpenAI(process.env.OPENAI_API_KEY);
-
-// Function to interact with OpenAI's GPT-3 model
-export async function createChatCompletion(prompt) {
-  try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        { role: 'system', content: 'You are a helpful assistant.' }, 
-        { role: 'user', content: prompt }
-      ]
-    });
-
-    return completion.data;
-  } catch (error) {
-    throw new Error('Error completing prompt with OpenAI:', error);
-  }
-}
 
 ```
 
@@ -128,9 +38,9 @@ export async function createChatCompletion(prompt) {
 
 ```bs
 (function () {
-  /*intrabend test(return hello world)[*/
-   // todo
-  /*[*/
+  /*test: say hello world*/
+    console.log("")
+  /*test*/
 })()
 ```
 
@@ -159,10 +69,10 @@ intrabend -i ./tests/hello-world.bs -b test
 ```md
 #### ./example.bs
 before:
-```bs
-/*intrabend welcome(log hello world)[*/
- // todo
-/*[*/
+```ts
+/*welcome: say hello world*/
+  console.log("");
+/*welcome*/
 ```
 
 #### terminal
@@ -173,10 +83,10 @@ intrabend -i ./example.bs -b welcome
 
 #### ./example.bs
 after:
-```bs
-/*intrabend welcome(log hello world)[*/
+```ts
+/*welcome: say hello world*/
   console.log("hello world");
-/*[*/
+/*welcome*/
 ```
 ```
 
@@ -204,13 +114,7 @@ main();
 ### ./CURRENT_ERROR.md
 
 ```md
-npm start -- -i ./tests/hello-world.bs -b test
 
-> intrabend@1.0.0 start
-> node cli.js -i ./tests/hello-world.bs -b test
-
-process.env.OPENAI_API_KEY j8ferjk5nerf34jwbcao8743dnm
-Method test not found in the input file.
 ```
 
 ### ./TODO.md
@@ -221,10 +125,11 @@ the program ... if there is an error then it will be placed within ./CURRENT_ERR
 otherwise assume i have updated my requirements.
 
 durring todo: if there is an error within ./CURRENT_ERROR.md then help me solve that
-otherwise don't worry about it and proceed with todo rules.
+otherwise don't worry about it and proceed with the following todo rules.
 
 TODO RULES:
  1) return a ./cli.js file
-
+ 2) i'd like JavaScript code in response to my queries!
+ 3) keep console.log statements for debugging
 ```
 

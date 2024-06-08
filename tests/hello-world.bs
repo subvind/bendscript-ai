@@ -1,5 +1,5 @@
 (function () {
-  /*intrabend test(return hello world)[*/
-   // todo
-  /*[*/
+  /*test: say hello world*/
+    console.log("")
+  /*test*/
 })()

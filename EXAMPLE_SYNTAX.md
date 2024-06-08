@@ -1,9 +1,9 @@
 #### ./example.bs
 before:
-```bs
-/*intrabend welcome(log hello world)[*/
- // todo
-/*[*/
+```ts
+/*welcome: say hello world*/
+  console.log("");
+/*welcome*/
 ```
 
 #### terminal
@@ -14,8 +14,8 @@ intrabend -i ./example.bs -b welcome
 
 #### ./example.bs
 after:
-```bs
-/*intrabend welcome(log hello world)[*/
+```ts
+/*welcome: say hello world*/
   console.log("hello world");
-/*[*/
+/*welcome*/
 ```
