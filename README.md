@@ -1,5 +1,6 @@
-BendScript
+intrabend
 ========
+
 homepage:
 - https://bendscript.com
 
